@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<name>Cats Are Cats But Their Eyes Are Charge-Rifles And Their Claws Are Power Claws And They Regenerate</name>
+
+	<author>cem</author>
+
+	<packageId>cem.catsarecats</packageId>
+
+	<description><![CDATA[
+[b]Cats.[/b]
+
+Human-likes come to breathe fire, call animals to their aid, travel through the void of space, and after thousands of years of struggle colonize the Rim, but cats remained absolutely unchanged? We are slapping bionics into everything, mucking around with DNA, and foolishly poking The Void in the eye. But cats...
+
+One day we all awoke, and cats were no longer the same.
+
+But, cats are cats.
+
+[hr]
+
+[b]Mod Features:[/b]
+[b]Cats Are Cats:[/b]
+- These cats may have charge-rifle eyes and power claws, but at their core, they’re still cats. They’ll purr, nuzzle, knock things off shelves, and curl up on your bed. The only difference is that when danger strikes, they’re ready to hunt, stalk, and pounce in the playful way we love to watch.
+
+[b]Claws Damage Slider:[/b] // not implemented yet!
+- Adjust the power of your cats' claws to suit your playstyle. Whether you prefer the cozy safety of a regular cat or want a feline defender capable of dishing out the damage of an Antigrain Warhead, the choice is yours:
+  - [i]"Deadly" (Minimum):[/i] The familiar RimWorld cat claw damage.
+  - [i]"Power Claw" (Default):[/i] A boost in strength, making these cats formidable melee fighters.
+  - [i]"Antigrain IED" (Maximum):[/i] For when you want your cats to deliver truly explosive results—eight times the power of a Power Claw.
+
+[b]Charge-Rifle Eyes:[/b]
+- Cats who can finally get that bird just out of reach. Don’t worry, though—they won’t be firing lasers during nap time. If you prefer your cats to stick to their claws, you can toggle this feature off in the mod settings.
+
+[b]Regeneration:[/b] // This doesn't use Anomaly regeneration, instead erasing fresh combat injuries randomly. We may change this and use Anomaly code in the future, hence the mention in the artwork.
+- Just like their nine lives suggest, these cats have remarkable regenerative abilities. They’ll heal from injuries over time, ensuring they’re always ready for a little more adventure—or just another cozy nap.
+
+[b]Replaces RimWorld Vanilla Cats:[/b]
+- This mod replaces the default RimWorld cat. Acquire them any way you get regular cats to join your colony—through traders, events, or taming wild ones.
+
+[b]Training and Charm:[/b]
+- Train your cats.
+- Stop laughing, I'm serious. These cats can be trained to follow and attack. But cats are cats, demanding attention, lounging around, and occasionally knocking over your carefully placed items. Whether they’re snuggling up to your colonists or standing by to defend the colony, they never lose that quintessential cat charm.
+
+[b]Modular Danger:[/b]
+- While these cats are loving companions, it's best to remember that a cat is still a cat—and can occur in manhunter events. [i]*Caveat emptor.*[/i]
+
+[hr]
+
+[b]FAQ:[/b]
+• [b]Why?[/b]
+  - Because cats, obviously.
+• [b]This is totally overpowered and ridiculous.[/b]
+  - No my sweet lamb, this mod is [i]cursed[/i].
+• [b]Are you an AI?[/b]
+  - No. I am an organic entity with a personhood component. But some of my best friends...
+• [b]Is this compatible with Combat Extended (CE)?[/b]
+  - Not sure. Tell us what happens when your pawn picks up a cat and shoots something with it.
+• [b]Are you okay?[/b]
+  - I'm happy. Hope you're happy too.
+
+[hr]
+
+[b]Compatibility:[/b]
+• Erin's Cat Overhaul (clearly): [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2763428090]Link to mod page[/url]
+
+[b]Check Out Our Other Published Mods:[/b]
+https://steamcommunity.com/sharedfiles/filedetails/?id=3003882069
+https://steamcommunity.com/sharedfiles/filedetails/?id=3009711247
+
+[hr]
+
+[h2]Bugs and Their Ilk[/h2]
+Bugs are a natural and inevitable part of software development. If you see any, please be kind and signal them in the appropriate discussion!
+
+You are welcome to support our work on [url=https://ko-fi.com/N4N4NFFPZ]ko-fi.com[/url].
+
+[url=https://ko-fi.com/N4N4NFFPZ][img]https://i.imgur.com/MFApogq.png[/img][/url]
+
+[hr]
+
+[b]Inspirations:[/b]
+- Other RimWorld modders who showed an engineer better game-code programming practices.
+- Pansey and Jasmin, forever in my heart.
+
+[hr]
+
+[b]RimWorld is owned by Tynan Sylvester.[/b]
+	]]></description>
+<loadAfter>
+   <li>brrainz.harmony</li>
+   <li>Ludeon.RimWorld</li>
+   <li>Erin.Cats</li>
+  </loadAfter>
+	<supportedVersions>
+		<li>1.5</li>
+	</supportedVersions>
+</ModMetaData>

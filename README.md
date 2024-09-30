@@ -1,0 +1,1 @@
+Cursed cat-replacement mod for RimWorld 1.5.
