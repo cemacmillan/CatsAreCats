@@ -1,6 +1,10 @@
-namespace SlippersNmSpc;
+using System.Collections.Generic;
+using Verse;
 
-public class MaterialTagDefExtension
+namespace SlippersNmSpc
 {
-    
+    public class MaterialTagDefExtension : DefModExtension
+    {
+        public List<string> materialTags;
+    }
 }

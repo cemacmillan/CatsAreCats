@@ -1,196 +1,191 @@
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
+using MindMattersInterface;
+using System.Linq;
 
-namespace SlippersNmSpc
+namespace SlippersNmSpc;
+
+// I don't like being told about typos in identifiers when they aren't typos
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("ReSharper", "IdentifierTypo")]
+public class CompFreedomSuppressor : ThingComp, IDynamicComp
 {
-    public class CompPainCauser : ThingComp, IDynamicComp
+    public CompProperties_FreedomSuppressor Props => (CompProperties_FreedomSuppressor)props;
+
+    private Pawn wearer;
+    private int pinchInterval;
+    private float constraintFactor;
+    
+    private DynAppCompModExtension cachedModExtension;
+    private List<DynAppCompModExtension.NeedSatisfier> cachedNeedSatisfiers;
+    private int updateCounter = 0; // To align with NeedInterval
+    private const int UpdateFrequency = 150; // Adjust as needed
+   
+    public int PinchInterval
     {
-        public CompProperties_PainCauser Props => (CompProperties_PainCauser)props;
+        get => pinchInterval;
+        set => pinchInterval = value;
+    }
 
-        private Pawn wearer;
-        private int stabInterval;
-        private float painFactor;
-
-        public int StabInterval
-        {
-            get => stabInterval;
-            set => stabInterval = value;
-        }
-
-        public float PainFactor
-        {
-            get => painFactor;
-            set => painFactor = value;
-        }
-        public override void Initialize(CompProperties props)
-        {
-            SlippersUtility.DebugLog($"[CompPainCauser] {this.GetType().Name} on {parent.LabelCap} enters Initialize.");
+    public float ConstraintFactor
+    {
+        get => constraintFactor;
+        set => constraintFactor = value;
+    }
+    
+    public override void Initialize(CompProperties props)
+    {
+        base.Initialize(props);
         
-            
-            base.Initialize(props);
+        cachedModExtension = parent.def.GetModExtension<DynAppCompModExtension>();
+        cachedNeedSatisfiers = cachedModExtension?.needSatisfiers?.ToList();
 
-            props = DynamicCompPropertiesRegistry.GetPropertiesFor(this.GetType());
-            if (props is CompProperties_PainCauser painProps)
+        if (props is CompProperties_FreedomSuppressor constraintProps)
+        {
+            PinchInterval = constraintProps.pinchInterval;
+            ConstraintFactor = constraintProps.constraintFactor;
+        }
+        else
+        {
+            MMToolkit.GripeOnce($"[CompFreedomSuppressor] Missing or invalid properties for {parent.LabelCap}.");
+        }
+    }
+
+    public void NotifyEquipped(Pawn pawn)
+    {
+        wearer = pawn;
+        cachedModExtension = parent.def.GetModExtension<DynAppCompModExtension>();
+        cachedNeedSatisfiers = cachedModExtension?.needSatisfiers?.ToList();
+
+        if (wearer != null && wearer.Spawned && cachedNeedSatisfiers != null)
+        {
+            foreach (DynAppCompModExtension.NeedSatisfier needSatisfier in cachedNeedSatisfiers)
             {
-                StabInterval = painProps.stabInterval;
-                PainFactor = painProps.painFactor;
-                SlippersUtility.DebugLog($"[CompPainCauser] {this.GetType().Name} initialized for for {parent.LabelCap} with StabInterval: {StabInterval} and PainFactor: {PainFactor}.");
+                DynamicNeeds.UpdateBaseline(wearer, needSatisfier.needDefName, needSatisfier.satisfactionBaseContrib, isAdding: true);
             }
-            else
+        }
+    }
+
+    public void NotifyUnequipped(Pawn pawn)
+    {
+        if (pawn == null || wearer != pawn)
+        {
+            wearer = null;
+            return;
+        }
+
+        if (cachedNeedSatisfiers != null)
+        {
+            foreach (DynAppCompModExtension.NeedSatisfier needSatisfier in cachedNeedSatisfiers)
             {
-                Log.Warning($"[CompPainCauser] {this.GetType().Name}: Missing or invalid properties during initialization for {parent.LabelCap}.");
+                DynamicNeeds.UpdateBaseline(pawn, needSatisfier.needDefName, needSatisfier.satisfactionBaseContrib, isAdding: false);
             }
         }
 
-        /*
-        public override void PostSpawnSetup(bool respawningAfterLoad)
-        {
-            /* base.PostSpawnSetup(respawningAfterLoad);
+        wearer = null;
+        cachedModExtension = null;
+        cachedNeedSatisfiers = null;
+    }
 
-            props = DynamicCompPropertiesRegistry.GetPropertiesFor(this.GetType());
-            if (props is CompProperties_PainCauser painProps)
-            {
-                StabInterval = painProps.stabInterval;
-                SlippersUtility.DebugLog($"[CompPainCauser] PostSpawnSetup after load for {parent.LabelCap} with StabInterval: {StabInterval}.");
-            }
-        }*/
-            
-        public override void PostSpawnSetup(bool respawningAfterLoad)
-        {
-            SlippersUtility.DebugLog($"[CompPainCauser] {this.GetType().Name} on {parent.LabelCap} enters PostSpawnSetup.");
-            base.PostSpawnSetup(respawningAfterLoad);
+    public void onEquippedTick(Pawn pawn)
+    {
+        if (pawn == null || pawn.Dead || cachedNeedSatisfiers == null) return;
 
-            if (respawningAfterLoad)
-            {
-                Initialize(props); // Reinitialize properties if needed
-                SlippersUtility.DebugLog($"[CompPainCauser] PostSpawnSetup after load for {parent.LabelCap}.");
-            }
-            else
-            {
-                Initialize(props);
-                SlippersUtility.DebugLog($"[CompPainCauser] ConditionB {parent.LabelCap}.");
-            }
+        updateCounter++;
+        if (updateCounter < UpdateFrequency) return; // Skip until the update frequency matches
+        updateCounter = 0;
+
+        foreach (DynAppCompModExtension.NeedSatisfier needSatisfier in cachedNeedSatisfiers)
+        {
+            DynamicNeeds.SatisfyNeedOnTick(pawn, needSatisfier.needDefName, needSatisfier.satisfactionPerTick);
+        }
+    }
+
+    public void onEquippedTickRare(Pawn pawn)
+    {
+        if (pawn == null || pawn.Dead) return;
+
+        // Check and apply pinch effects
+        TryApplyPinchEffect(pawn);
+    }
+
+    private void SatisfyConstraintNeed(Pawn pawn)
+    {
+        if (pawn == null || pawn.Dead) return;
+
+        float qualityFactor = QualityFactor();
+        float satisfactionIncrease = ConstraintFactor * qualityFactor;
+
+        // Apply satisfaction for ConstraintNeed
+        DynamicNeeds.SatisfyNeed(pawn, "ConstraintNeed", satisfactionIncrease);
+
+        // Optionally apply satisfaction to FormalityNeed
+        if (!pawn.Downed && !pawn.InMentalState)
+        {
+            DynamicNeeds.SatisfyNeed(pawn, "FormalityNeed", satisfactionIncrease * 0.5f);
+        }
+    }
+
+    private void TryApplyPinchEffect(Pawn pawn)
+    {
+        if (pawn == null || pawn.health?.hediffSet == null) return;
+
+        // Avoid pinch if pain level is already critical
+        if (pawn.health.hediffSet.PainTotal > pawn.GetStatValue(StatDefOf.PainShockThreshold)) return;
+
+        float qualityFactor = QualityFactor();
+        float probability = SlippersMod.Settings.FaintingBanality/ qualityFactor; // Higher quality reduces chance
+
+        if (Rand.Chance(probability))
+        {
+            ApplyPinchEffect(pawn, qualityFactor);
+        }
+    }
+
+    private void ApplyPinchEffect(Pawn pawn, float qualityFactor)
+    {
+        if (pawn == null) return;
+
+        Hediff pinchHediff;
+        string eventType;
+        HashSet<string> tags;
+
+        if (Rand.Range(0f, 1f) < qualityFactor / 2)
+        {
+            pinchHediff = HediffMaker.MakeHediff(SlippersNmSpc.DefOfs.LittleFaint, pawn);
+            eventType = "MinorFaint";
+            tags = ["ConstrainingApparel", "MinorDiscomfort"];
+        }
+        else
+        {
+            pinchHediff = HediffMaker.MakeHediff(SlippersNmSpc.DefOfs.SevereFaint, pawn);
+            eventType = "MajorFaint";
+            tags = ["ConstrainingApparel", "SevereDiscomfort"];
+
+            DynamicNeeds.SatisfyNeed(pawn, "ConstraintNeed", 0f, satisfyToMax: true);
         }
 
-        public override void PostExposeData()
+        if (pinchHediff != null)
         {
-            base.PostExposeData();
+            pawn.health.AddHediff(pinchHediff);
+            pinchHediff.Severity += ConstraintFactor * (1 / qualityFactor);
 
-            props = DynamicCompPropertiesRegistry.GetPropertiesFor(this.GetType());
-            if (props is CompProperties_PainCauser painProps)
-            {
-                StabInterval = painProps.stabInterval;
-                PainFactor = painProps.painFactor;
-                SlippersUtility.DebugLog($"[CompPainCauser] PostExposeData: Reloaded for {parent.LabelCap} with StabInterval: {StabInterval}.");
-            }
-            else
-            {
-                Log.Error($"[CompPainCauser] Missing CompProperties for {parent.LabelCap} during PostExposeData. This is the serious case.");
-            }
+            DynamicNeeds.NotifyExperience(pawn, eventType, ExperienceValency.Negative, tags);
         }
+    }
 
-        public void NotifyEquipped(Pawn pawn)
+    private float QualityFactor()
+    {
+        CompQuality compQuality = parent.TryGetComp<CompQuality>();
+        return compQuality?.Quality switch
         {
-            if(pawn == null)
-                SlippersUtility.DebugLog("[CompPainCauser]NotifyEquipped - pawn is null. This serious.");
-            wearer = pawn;
-
-            if (wearer != null && wearer.Spawned)
-            {
-                // should trigger counter here ApplyComfortBonus();
-                SlippersUtility.DebugLog($"[CompPainCauser] {parent.LabelCap} equipped by {pawn.LabelShort}.");
-            }
-        }
-
-        public void NotifyUnequipped(Pawn pawn)
-        {
-            if (wearer == null || pawn == null)
-            {
-                SlippersUtility.DebugLog($"[PainCauser] Skipping NotifyUnequipped for {parent?.LabelCap ?? "unknown item"} as wearer or pawn is null.");
-                return;
-            }
-
-            wearer = null; // Clear wearer reference
-            SlippersUtility.DebugLog($"[PainCauserer] {parent.LabelCap} unequipped by {pawn.LabelShort}.");
-        }
-        
-        public void onEquippedTick(Pawn pawn)
-        {
-            // Placeholder for normal ticks
-        }
-
-        public void onEquippedTickRare(Pawn pawn)
-        {
-            //if (pawn == null || parent == null) return;
-            if (pawn == null) 
-                SlippersUtility.DebugLog("Pawn null at OnEquippedTickRare.");
-            if (parent == null)
-                SlippersUtility.DebugLog("Parent null at OnEquippedTickRare.");
-
-            SlippersUtility.DebugLog($"[CompPainCauser] Rare tick triggered for {pawn.LabelShort} wearing {parent.LabelCap}.");
-
-            if (Find.TickManager.TicksGame % StabInterval == 0)
-            {
-                try
-                {
-                    SlippersUtility.DebugLog($"[CompPainCauser] Triggering pain effect for {pawn.LabelShort} from {parent.LabelCap}.");
-                    ApplyPainEffect(pawn);
-                }
-                catch (System.Exception ex)
-                {
-                    Log.Error($"[CompPainCauser] Exception in OnEquippedTickRare for {parent.LabelCap}: {ex}");
-                }
-              
-            }
-        }
-
-        private void ApplyPainEffect(Pawn pawn)
-        {
-            if (pawn.Dead || pawn.Downed) return;
-
-            // Calculate pain increase based on quality
-            float qualityFactor = QualityFactor();
-            float painIncrease = PainFactor * qualityFactor;
-
-            // Retrieve or add the DebilitatingPain hediff
-            Hediff hediff = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDef.Named("DebilitatingPain"));
-            if (hediff == null)
-            {
-                hediff = HediffMaker.MakeHediff(HediffDef.Named("DebilitatingPain"), pawn);
-                pawn.health.AddHediff(hediff);
-            }
-
-            // Increase the pain severity
-            hediff.Severity += painIncrease;
-            SlippersUtility.DebugLog($"[CompPainCauser] {pawn.LabelShort} suffers {painIncrease} additional pain from {parent.LabelCap}. Total pain severity: {hediff.Severity}");
-
-            // Check for downing based on total pain
-            float totalPain = pawn.health.hediffSet.PainTotal;
-            if (totalPain >= pawn.GetStatValue(StatDefOf.PainShockThreshold))
-            {
-                SlippersUtility.DebugLog($"[CompPainCauser] {pawn.LabelShort} collapses from pain caused by {parent.LabelCap}!");
-                pawn.stances.stunner.StunFor(300, null, false, true);
-            }
-        }
-
-        private float QualityFactor()
-        {
-            var compQuality = parent.TryGetComp<CompQuality>();
-            return compQuality?.Quality switch
-            {
-                QualityCategory.Awful => 0.5f,
-                QualityCategory.Poor => 0.75f,
-                QualityCategory.Normal => 1.0f,
-                QualityCategory.Good => 1.25f,
-                QualityCategory.Excellent => 1.5f,
-                QualityCategory.Masterwork or QualityCategory.Legendary => 2.0f,
-                _ => 1.0f
-            };
-        }
-
-        public override string CompInspectStringExtra()
-        {
-            return $"Causes pain every {Props.stabInterval / 250} seconds.";
-        }
+            QualityCategory.Awful => 0.5f,
+            QualityCategory.Poor => 0.75f,
+            QualityCategory.Normal => 1.0f,
+            QualityCategory.Good => 1.25f,
+            QualityCategory.Excellent => 1.5f,
+            QualityCategory.Masterwork or QualityCategory.Legendary => 2.0f,
+            _ => 1.0f
+        };
     }
 }

@@ -1,21 +1,31 @@
 ﻿using Verse;
+using UnityEngine;
 
-namespace DIL_CatsAreCats;
+namespace SlippersNmSpc;
 
-public class CatsAreCatsModSettings : ModSettings
+public class SlippersModSettings : ModSettings
 {
-    // Private backing fields for properties
-    public bool EnableLogging = false;
-    public bool ChargeRifleEyes = true;
-    public float ClawDamage = 0.5f;
+    public const float FaintingInternalMin = 0.0f;
+    public const float FaintingInternalMax = 0.3f;
+    public const float FaintingBaseline = 0.013f;
 
+    public bool EnableLogging = false;
+    public float FaintingBanality = FaintingBaseline; 
 
     public override void ExposeData()
     {
         base.ExposeData();
-        // Using the backing fields for Scribe_Values.Look
+        Scribe_Values.Look(ref FaintingBanality, "FaintingBanality", FaintingBaseline);
         Scribe_Values.Look(ref EnableLogging, "EnableLogging", false);
-        Scribe_Values.Look(ref ChargeRifleEyes, "ChargeRifleEyes", true);
-        Scribe_Values.Look(ref ClawDamage, "ClawDamage", 0.5f);
+    }
+
+    public static float NormalizeFaintingBanality(float internalValue)
+    {
+        return Mathf.InverseLerp(FaintingInternalMin, FaintingInternalMax, internalValue) * 2f;
+    }
+
+    public static float DenormalizeFaintingBanality(float normalizedValue)
+    {
+        return Mathf.Lerp(FaintingInternalMin, FaintingInternalMax, normalizedValue / 2f);
     }
 }
