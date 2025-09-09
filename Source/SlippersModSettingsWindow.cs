@@ -3,19 +3,19 @@ using Verse;
 
 namespace DIL_CatsAreCats
 {
-    public class CatsAreCatsModSettingsWindow : Window
+    public class SlippersModSettingsWindow : Window
     {
         private Vector2 scrollPosition;
-        public CatsAreCatsModSettings modSettings;
+        private CatsAreCatsModSettings _modSettings;
 
-        public CatsAreCatsModSettingsWindow(CatsAreCatsModSettings settings)
+        public SlippersModSettingsWindow(CatsAreCatsModSettings settings)
         {
             doCloseX = true;
             forcePause = false;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
 
-            modSettings = settings;
+            _modSettings = settings;
         }
 
         public override void DoWindowContents(Rect inRect)
@@ -28,16 +28,16 @@ namespace DIL_CatsAreCats
             listing.Begin(contentRect);
 
             // Checkbox for enabling logging
-            listing.CheckboxLabeled("Enable Logging", ref modSettings.EnableLogging);
+            listing.CheckboxLabeled("Enable Logging", ref _modSettings.EnableLogging, "DIL_CatsAreCatsModSettings.EnableLogging");
 
             // Checkbox for enabling Charge Rifle Eyes
-            listing.CheckboxLabeled("Enable Charge Rifle Eyes", ref modSettings.ChargeRifleEyes);
+            listing.CheckboxLabeled("Enable Charge Rifle Eyes", ref _modSettings.ChargeRifleEyes);
 
             // Damage slider with custom labels
             listing.Label("Claw Damage:");
             Rect sliderRect = listing.GetRect(22f);
-            modSettings.ClawDamage = Widgets.HorizontalSlider(sliderRect, modSettings.ClawDamage, 0f, 1f, true, 
-                $"{modSettings.ClawDamage:0.00}", "Deadly", "Antigrain IED", 0.01f);
+            _modSettings.ClawDamage = Widgets.HorizontalSlider(sliderRect, _modSettings.ClawDamage, 0f, 1f, true, 
+                $"{_modSettings.ClawDamage:0.00}", "Deadly", "Antigrain IED", 0.01f);
 
             listing.End();
             Widgets.EndScrollView();
@@ -45,7 +45,7 @@ namespace DIL_CatsAreCats
             // Save button
             if (Widgets.ButtonText(new Rect(inRect.x, inRect.yMax - 25f, inRect.width, 25f), "Save"))
             {
-                modSettings.Write();
+                _modSettings.Write();
                 Close();
             }
         }
@@ -61,7 +61,7 @@ namespace DIL_CatsAreCats
         public override void Close(bool doCloseSound = true)
         {
             base.Close(doCloseSound);
-            modSettings.Write();
+            _modSettings.Write();
         }
     }
 }

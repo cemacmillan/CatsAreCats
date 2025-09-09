@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
+    <!--
     <AbilityDef>
         <defName>CatLeap</defName>
         <label>Cat Leap</label>
@@ -37,4 +38,5 @@
 
         <jobDef>CastJump</jobDef>
     </AbilityDef>
+    -->
 </Defs>
