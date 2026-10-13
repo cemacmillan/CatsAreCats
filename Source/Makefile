@@ -4,7 +4,8 @@ rwproj=/Volumes/expand/projects/rw
 modname=CatsAreCats
 steam_mods_dir=/Users/cem/Library/Application\ Support/Steam/steamapps/common/RimWorld/Mods
 dll_source=obj/Release/net48/CatsAreCats.dll
-dll_target=../1.6/Assemblies/CatsAreCats.dll
+dll_target_16=../1.6/Assemblies/CatsAreCats.dll
+dll_target_17=../1.7/Assemblies/CatsAreCats.dll
 
 check-dll:
 	@echo "=== Checking DLL status ==="
@@ -14,27 +15,19 @@ check-dll:
 	else \
 		echo "Source DLL not found: ${dll_source}"; \
 	fi
-	@if [ -f "${dll_target}" ]; then \
-		echo "Target DLL: ${dll_target}"; \
-		ls -la "${dll_target}"; \
-	else \
-		echo "Target DLL not found: ${dll_target}"; \
-	fi
+	@for f in "${dll_target_16}" "${dll_target_17}"; do \
+		if [ -f "$$f" ]; then echo "Target DLL: $$f"; ls -la "$$f"; else echo "Target DLL not found: $$f"; fi; \
+	done
 
 compare-dll: check-dll
 	@echo "=== Comparing DLLs ==="
-	@if [ -f "${dll_source}" ] && [ -f "${dll_target}" ]; then \
-		if cmp -s "${dll_source}" "${dll_target}"; then \
-			echo "DLLs are identical - no deployment needed"; \
-		else \
-			echo "DLLs differ - deployment needed"; \
-			echo "Source: $$(stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' "${dll_source}")"; \
-			echo "Target: $$(stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' "${dll_target}")"; \
-		fi; \
-	elif [ -f "${dll_source}" ] && [ ! -f "${dll_target}" ]; then \
-		echo "Source exists but target missing - deployment needed"; \
+	@if [ ! -f "${dll_source}" ]; then echo "Source DLL not found - build needed"; \
 	else \
-		echo "Source DLL not found - build needed"; \
+		for f in "${dll_target_16}" "${dll_target_17}"; do \
+			if [ ! -f "$$f" ]; then echo "Source exists but target missing: $$f"; \
+			elif cmp -s "${dll_source}" "$$f"; then echo "Identical: $$f"; \
+			else echo "DLLs differ: $$f"; fi; \
+		done; \
 	fi
 
 build:
@@ -46,9 +39,11 @@ build:
 deploy-dll: build
 	@echo "=== Deploying DLL ==="
 	@if [ -f "${dll_source}" ]; then \
-		cp "${dll_source}" "${dll_target}"; \
-		echo "DLL deployed to ${dll_target}"; \
-		ls -la "${dll_target}"; \
+		mkdir -p ../1.6/Assemblies ../1.7/Assemblies; \
+		cp "${dll_source}" "${dll_target_16}"; \
+		cp "${dll_source}" "${dll_target_17}"; \
+		echo "DLL deployed to ${dll_target_16} and ${dll_target_17}"; \
+		ls -la "${dll_target_16}" "${dll_target_17}"; \
 	else \
 		echo "Source DLL not found: ${dll_source}"; \
 		exit 1; \
@@ -64,8 +59,5 @@ install: deploy
 clean:
 	@echo "=== Cleaning build artifacts ==="
 	rm -rf obj bin
-	@if [ -f "${dll_target}" ]; then \
-		rm "${dll_target}"; \
-		echo "Removed ${dll_target}"; \
-	fi
+	@rm -f "${dll_target_16}" "${dll_target_17}"
 	@echo "Clean completed"
