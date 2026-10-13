@@ -2,7 +2,7 @@
 
 rwproj=/Volumes/expand/projects/rw
 modname=CatsAreCats
-steam_mods_dir=/Users/cem/Library/Application\ Support/Steam/steamapps/common/RimWorld/RimWorldMac.app/Mods
+steam_mods_dir=/Users/cem/Library/Application\ Support/Steam/steamapps/common/RimWorld/Mods
 dll_source=obj/Release/net48/CatsAreCats.dll
 dll_target=../1.6/Assemblies/CatsAreCats.dll
 
