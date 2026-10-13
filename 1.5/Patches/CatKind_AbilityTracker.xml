@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	<!-- 1.5 only: fields removed or moved in 1.6 (see 1.6/Patches/CatKind_1.6.xml). -->
+	<Operation Class="PatchOperationAdd">
+		<xpath>/Defs/ThingDef[defName="Cat"]/race</xpath>
+		<value>
+			<overrideShouldHaveAbilityTracker>true</overrideShouldHaveAbilityTracker>
+		</value>
+	</Operation>
+	<Operation Class="PatchOperationAdd">
+		<xpath>/Defs/ThingDef[defName="Cat"]/race</xpath>
+		<value>
+			<wildness>0</wildness>
+		</value>
+	</Operation>
+</Patch>

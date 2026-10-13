@@ -1,19 +1,21 @@
 ﻿using Verse;
 
-namespace DIL_CatsAreCats
-{
-    public class CatsAreCatsModSettings : ModSettings
-    {
-        public bool EnableLogging = false; // Enable/disable logging
-        public bool ChargeRifleEyes = true; // Enable/disable Charge Rifle Eyes
-        public float ClawDamage = 0.5f; // Damage slider, default at 0.5 (middle)
+namespace DIL_CatsAreCats;
 
-        public override void ExposeData()
-        {
-            base.ExposeData();
-            Scribe_Values.Look(ref EnableLogging, "EnableLogging", false); // Save/Load EnableLogging
-            Scribe_Values.Look(ref ChargeRifleEyes, "ChargeRifleEyes", false); // Save/Load ChargeRifleEyes
-            Scribe_Values.Look(ref ClawDamage, "ClawDamage", 0.5f); // Save/Load ClawDamage
-        }
+public class CatsAreCatsModSettings : ModSettings
+{
+    // Private backing fields for properties
+    public bool EnableLogging = false;
+    public bool ChargeRifleEyes = true;
+    public float ClawDamage = 0.5f;
+
+
+    public override void ExposeData()
+    {
+        base.ExposeData();
+        // Using the backing fields for Scribe_Values.Look
+        Scribe_Values.Look(ref EnableLogging, "EnableLogging", false);
+        Scribe_Values.Look(ref ChargeRifleEyes, "ChargeRifleEyes", true);
+        Scribe_Values.Look(ref ClawDamage, "ClawDamage", 0.5f);
     }
 }

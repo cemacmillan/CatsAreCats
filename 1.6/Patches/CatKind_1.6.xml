@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	<!-- 1.6: wildness is StatDef Wildness on ThingDef, not RaceProperties.wildness. -->
+	<Operation Class="PatchOperationAdd">
+		<xpath>/Defs/ThingDef[defName="Cat"]/statBases</xpath>
+		<value>
+			<Wildness>0</Wildness>
+		</value>
+	</Operation>
+</Patch>

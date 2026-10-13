@@ -14,6 +14,7 @@ namespace DIL_CatsAreCats
             this.compClass = typeof(CompVerbHandler);
         }
     }
+    
 
     public class CompVerbHandler : ThingComp
     {
@@ -36,6 +37,7 @@ namespace DIL_CatsAreCats
              // Regenerate health periodically
              if (Find.TickManager.TicksGame - lastRegenerationTick >= RegenerationTickInterval)
              {
+                 
                  CatKindHealthRegen.RegenerateHealth(pawn);
                  lastRegenerationTick = Find.TickManager.TicksGame;
              }
@@ -137,7 +139,7 @@ namespace DIL_CatsAreCats
                 return;
             }
 
-            bool useRanged = CatsAreCatsMod.settings.ChargeRifleEyes && Rand.Chance(Props.rangedProbability);
+            bool useRanged = CatsAreCatsMod.Settings.ChargeRifleEyes && Rand.Chance(Props.rangedProbability);
 
             if (useRanged)
             {
@@ -202,7 +204,7 @@ namespace DIL_CatsAreCats
                 return true;
             };
 
-            float maxDist = CatsAreCatsMod.settings.ChargeRifleEyes
+            float maxDist = CatsAreCatsMod.Settings.ChargeRifleEyes
                 ? GetRangedVerb(pawn)?.verbProps.range ?? 27f
                 : 10f; // Default melee range or adjust as needed
 

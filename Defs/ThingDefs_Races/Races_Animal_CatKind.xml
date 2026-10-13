@@ -45,13 +45,11 @@
       <baseHealthScale>8</baseHealthScale>
       <foodType>CarnivoreAnimal, OvivoreAnimal</foodType>
       <leatherDef>Leather_Light</leatherDef>
-      <wildness>0</wildness>
       <petness>1</petness>
       <trainability>Advanced</trainability>
       <nuzzleMtbHours>12</nuzzleMtbHours>
       <gestationPeriodDays>10</gestationPeriodDays>
       <nameOnTameChance>1</nameOnTameChance>
-      <overrideShouldHaveAbilityTracker>true</overrideShouldHaveAbilityTracker>
       <litterSizeCurve>
         <points>
           <li>(0.5, 0)</li>
